@@ -32,8 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// License:
 	// - The idea behind this function is licensed under: CC-BY-NC-SA 4.0: https://creativecommons.org/licenses/by-nc-sa/4.0/
-	// - author: 3Blue1Brown
-	// - original source file: https://github.com/3b1b/videos/blob/4203c7a9a54842b98c943d7d8f5d85dea330c543/sublime_custom_commands/manim_plugins.py
+	// - original source file, authored by 3Blue1Brown: https://github.com/3b1b/videos/blob/4203c7a9a54842b98c943d7d8f5d85dea330c543/sublime_custom_commands/manim_plugins.py
 	// - clarification of license: https://github.com/3b1b/videos/issues/79
 	// - Extent of modifications that this file has done:
 	//   This function was translated: from python & SublimeText APIs -> into TypeScript & VSCode APIs.
