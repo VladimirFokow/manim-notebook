@@ -92,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const command = cmds.join(" ");
 
 		// If one wants to run it in a different terminal,
-        // it's often to write to a file
+		// it's often to write to a file
 		await vscode.env.clipboard.writeText(command + " --prerun --finder -w");
 
 		// Run the command
