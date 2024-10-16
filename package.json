@@ -24,17 +24,27 @@
         "title": "Hello Data from vscode-manim"
       },
       {
+        "command": "vscode-manim.runScene",
+        "title": "Run scene from vscode-manim"
+      },
+      {
         "command": "vscode-manim.checkpointPaste",
         "title": "Checkpoint Paste from vscode-manim"
       }
     ],
     "keybindings": [
-        {
-            "command": "vscode-manim.checkpointPaste",
-            "key": "ctrl+' ctrl+r",
-            "mac": "cmd+' cmd+r",
-            "when": "editorTextFocus"
-        }
+      {
+          "command": "vscode-manim.runScene",
+          "key": "ctrl+shift+' ctrl+shift+r",
+          "mac": "cmd+shift+' cmd+shift+r",
+          "when": "editorTextFocus || terminalFocus"
+      },
+      {
+          "command": "vscode-manim.checkpointPaste",
+          "key": "ctrl+' ctrl+r",
+          "mac": "cmd+' cmd+r",
+          "when": "editorTextFocus || terminalFocus"
+      }
     ]
   },
   "scripts": {

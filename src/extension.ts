@@ -1,3 +1,7 @@
+// This file contains a function licensed under CC-BY-NC-SA 4.0.
+// See the comment below for details, starting with "License:"
+
+
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
@@ -26,8 +30,105 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 
+	// License:
+	// - The idea behind this function is licensed under: CC-BY-NC-SA 4.0: https://creativecommons.org/licenses/by-nc-sa/4.0/
+	// - author: 3Blue1Brown
+	// - original source file: https://github.com/3b1b/videos/blob/4203c7a9a54842b98c943d7d8f5d85dea330c543/sublime_custom_commands/manim_plugins.py
+	// - clarification of license: https://github.com/3b1b/videos/issues/79
+	// - Extent of modifications that this file has done:
+	//   This function was translated: from python & SublimeText APIs -> into TypeScript & VSCode APIs.
+	//
+	//
+	// "manim_run_scene"
+	// Runs the `manimgl` command, with data from the line where cursor starts.
+	// - if cursor is on a class definition line, no `-se <line_number>`
+	// - also copy the command to clipboard with ADDITIONAL args: `--prerun --finder -w`
+	//
+	// manimgl <file_name> <ClassName> [-se <line_number>] [--prerun --finder -w]
+	const disposable2 = vscode.commands.registerCommand('vscode-manim.runScene', async () => {
+
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			vscode.window.showErrorMessage('Editor not found');
+			return;
+		}
+
+		// Save the active file:
+		vscode.commands.executeCommand('workbench.action.files.save');
+
+		const file_path = editor.document.fileName;  // absolute path
+		if (!file_path.endsWith('.py')) {
+			vscode.window.showErrorMessage('Check failed: file must end with .py');
+			return;
+		}
+
+		const contents = editor.document.getText();
+		const all_lines = contents.split("\n");
+
+		// Find which lines define classes
+		const class_lines = all_lines  // E.g., class_lines = [{ line: "class FirstScene(Scene):", index: 3 }, ...]
+			.map((line, index) => ({ line, index }))
+			.filter(({ line }) => /^class (.+?)\((.+?)\):/.test(line));
+
+		// Where is the cursor (row = line)
+		const row = editor.selection.start.line;
+
+		// Find the first class defined before where the cursor is
+		const matching_class = class_lines  // E.g., matching_class = { line: "class SelectedScene(Scene):", index: 42 }
+			.reverse()
+			.find(({ index }) => index <= row);
+		if (!matching_class) {
+			vscode.window.showErrorMessage('No matching classes');
+			return;
+		}
+		const scene_name = matching_class.line.slice("class ".length, matching_class.line.indexOf("("));  // E.g., scene_name = "SelectedScene"
+
+		// Create the command
+		const cmds = ["manimgl", file_path, scene_name];
+		let enter = false;
+		if (row !== matching_class.index) {
+			cmds.push(`-se ${row + 1}`);
+			enter = true;
+		}
+		const command = cmds.join(" ");
+
+		// If one wants to run it in a different terminal,
+        // it's often to write to a file
+		await vscode.env.clipboard.writeText(command + " --prerun --finder -w");
+
+		// Run the command
+		const terminal = vscode.window.activeTerminal || vscode.window.createTerminal();
+		terminal.sendText(command);
+
+		// Focus some windows
+		if (enter) {
+			// Keep cursor where it started (in VSCode)
+			const cmd_focus_vscode = 'osascript -e "tell application \\"Visual Studio Code\\" to activate"';
+			// Execute the command in the shell after a delay (to give the animation window enough time to open)
+			await new Promise(resolve => setTimeout(resolve, 2500));
+			require('child_process').exec(cmd_focus_vscode);
+		} else {
+			terminal.show();
+		}
+
+		// // For debugging:
+		// console.log('file_path:', file_path);
+		// console.log('row:', row);
+		// // console.log('contents:', contents);
+		// // console.log('all_lines:', all_lines);
+		// console.log('class_lines:', class_lines);
+		// console.log('matching_class:', matching_class);
+		// console.log('scene_name:', scene_name);
+		// console.log('command:', command);
+	});
+
+
+
+
+	// "manim_checkpoint_paste"
+	// Run checkpoint_paste() on the selection of the active editor
 	let isExecuting = false;  // Flag: to prevent several commands executing at the same time (because clipboard saving would become uncontrollable in this case)
-	const disposable2 = vscode.commands.registerCommand('vscode-manim.checkpointPaste', async () => {
+	const disposable3 = vscode.commands.registerCommand('vscode-manim.checkpointPaste', async () => {
 		if (isExecuting) {
 			vscode.window.showInformationMessage('Please wait until the current command finishes executing.');
 			return;
@@ -87,7 +188,9 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 
-	context.subscriptions.push(disposable1, disposable2);
+
+
+	context.subscriptions.push(disposable1, disposable2, disposable3);
 }
 
 // This method is called when your extension is deactivated
